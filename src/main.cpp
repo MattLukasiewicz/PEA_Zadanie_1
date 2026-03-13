@@ -1,23 +1,25 @@
 #include <iostream>
-#include <iomanip>
 #include "WczytywanieKonfiguracji.h"
 #include "WczytywanieGrafu.h"
+#include "Algorytmy.h"
 
 using namespace std;
 
 int main() {
-    Konfiguracja moja_konf = wczytajKonfiguracje("config.ini");
 
-    Graf moj_graf = wczytajGraf(moja_konf.plik_wejsciowy);
+    Konfiguracja konf = wczytajKonfiguracje("config.ini");
 
-    if (moj_graf.rozmiar > 0) {
-        cout << "\nMacierz odleglosci z pliku " << moja_konf.plik_wejsciowy << ":\n";
-        for (int i = 0; i < moj_graf.rozmiar; i++) {
-            for (int j = 0; j < moj_graf.rozmiar; j++) {
-                cout << setw(4) << moj_graf.macierz[i][j] << " ";
-            }
-            cout << endl;
-        }
+    cout << "Zaladowano konfiguracje." << endl;
+    cout << "Plik wejsciowy: " << konf.plik_wejsciowy << endl;
+    cout << "Algorytm: " << konf.algorytm << endl;
+    cout << "----------------------------------------------" << endl;
+
+    Graf mojGraf = wczytajGraf(konf.plik_wejsciowy);
+
+    if (mojGraf.rozmiar > 0) {
+        PrzegladZupelny(mojGraf);
+    } else {
+        cout << "BŁĄD: Nie udalo sie wczytac grafu. Sprawdz sciezke w config.ini!" << endl;
     }
 
     return 0;

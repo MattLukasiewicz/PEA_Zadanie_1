@@ -1,0 +1,41 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build program.exe (g++)",
+            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "src/main.cpp",
+                "src/WczytywanieKonfiguracji.cpp",
+                "src/WczytywanieGrafu.cpp",
+                "src/Algorytmy.cpp",
+                "-o",
+                "program.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Build full project with g++"
+        },
+        {
+            "type": "shell",
+            "label": "Run program.exe",
+            "command": "${workspaceFolder}\\program.exe",
+            "dependsOn": "Build program.exe (g++)",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
