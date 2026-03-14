@@ -43,17 +43,31 @@ Konfiguracja wczytajKonfiguracje(string nazwa_pliku) {
             else if (klucz == "liczba_powtorzen") {
                 konfiguracja.liczba_powtorzen = stoi(wartosc); 
             }
-            else if (klucz == "rozmiar_poczatek") {
-                konfiguracja.rozmiar_poczatek = stoi(wartosc);
+            else if (klucz == "rozmiar_poczatkowy") {
+                konfiguracja.rozmiar_poczatkowy = stoi(wartosc);
             }
-            else if (klucz == "rozmiar_koniec") {
-                konfiguracja.rozmiar_koniec = stoi(wartosc);
+            else if (klucz == "rozmiar_koncowy") {
+                konfiguracja.rozmiar_koncowy = stoi(wartosc);
             }
             else if (klucz == "pokazuj_pasek_postepu") {
                 if (wartosc == "1") {
                     konfiguracja.pokazuj_pasek_postepu = true;
                 } else {
                     konfiguracja.pokazuj_pasek_postepu = false;
+                }
+            }
+            else if (klucz == "tryb_z_pliku") {
+                if (wartosc == "1") {
+                    konfiguracja.tryb_z_pliku = true;
+                } else {
+                    konfiguracja.tryb_z_pliku = false;
+                }
+            }
+            else if (klucz == "tryb_symulacji") {
+                if (wartosc == "1") {
+                    konfiguracja.tryb_symulacji = true;
+                } else {
+                    konfiguracja.tryb_symulacji = false;
                 }
             }
         }

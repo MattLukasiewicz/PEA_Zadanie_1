@@ -43,11 +43,13 @@ void PrzegladZupelny(const Graf& graf) {
         }
 
     } while (next_permutation(trasaMiast.begin() + 1, trasaMiast.end()));
-
+    /*
     cout << "--- WYNIK BRUTE FORCE ---" << endl;
     cout << "Najlepszy koszt: " << minimalny_koszt << endl;
     cout << "Najlepsza trasa: ";
     for (int i = 0; i < liczbaMiast; i++) cout << najlepsza_trasa[i] << " -> ";
     cout << najlepsza_trasa[0] << endl; // Powrot
     cout << "-------------------------" << endl;
+    */
+   cout << "Minimalny koszt: " << minimalny_koszt << endl;
 }

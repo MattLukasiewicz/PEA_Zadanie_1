@@ -1,2 +1,0 @@
-g++ src\main.cpp src\WczytywanieKonfiguracji.cpp -o PEA_Zadanie_1.exe
-.\PEA_Zadanie_1.exe

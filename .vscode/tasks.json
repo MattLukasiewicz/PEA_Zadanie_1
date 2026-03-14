@@ -12,6 +12,8 @@
                 "src/WczytywanieKonfiguracji.cpp",
                 "src/WczytywanieGrafu.cpp",
                 "src/Algorytmy.cpp",
+                "src/Stoper.cpp",
+                "src/Generator.cpp",
                 "-o",
                 "program.exe"
             ],
