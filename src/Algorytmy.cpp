@@ -69,8 +69,8 @@ int NajblizszySasiad(const Graf& graf) {
     return calkowityKoszt;
 }
 
-void PrzegladZupelny(const Graf& graf) {
-    if (graf.rozmiar <= 0) return;
+int PrzegladZupelny(const Graf& graf) {
+    if (graf.rozmiar <= 0) return -1;
 
     int liczbaMiast = graf.rozmiar;
     vector<int> trasaMiast;
@@ -89,11 +89,5 @@ void PrzegladZupelny(const Graf& graf) {
         }
 
     } while (next_permutation(trasaMiast.begin() + 1, trasaMiast.end()));
-    /*
-    cout << "Przeglad zupelny" << endl;
-    cout << "Najlepszy koszt: " << minimalny_koszt << endl;
-    cout << "Najlepsza trasa: ";
-    for (int i = 0; i < liczbaMiast; i++) cout << najlepsza_trasa[i] << " -> ";
-    cout << najlepsza_trasa[0] << endl; // Powrot
-    */
+   return minimalny_koszt;
 }

@@ -8,4 +8,4 @@ struct Graf {
     std::vector<std::vector<int>> macierz;
 };
 
-Graf wczytajGraf(std::string nazwa_pliku);
+Graf wczytajGraf(std::string nazwa_pliku, bool pokazKomunikaty = true);

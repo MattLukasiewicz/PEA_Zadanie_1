@@ -97,6 +97,32 @@ Konfiguracja wczytajKonfiguracje(string nazwa_pliku) {
                     konfiguracja.czy_symetryczny = false;
                 }
             }
+            else if (klucz == "generuj_pliki_raz") {
+                if (wartosc == "1") {
+                    konfiguracja.generuj_pliki_raz = true;
+                } else {
+                    konfiguracja.generuj_pliki_raz = false;
+                }
+            }
+            else if (klucz == "generuj_min_n") {
+                konfiguracja.generuj_min_n = stoi(wartosc);
+            }
+            else if (klucz == "generuj_max_n") {
+                konfiguracja.generuj_max_n = stoi(wartosc);
+            }
+            else if (klucz == "katalog_sym") {
+                konfiguracja.katalog_sym = wartosc;
+            }
+            else if (klucz == "katalog_asym") {
+                konfiguracja.katalog_asym = wartosc;
+            }
+            else if (klucz == "wyswietl_macierze_symulacji") {
+                if (wartosc == "1") {
+                    konfiguracja.wyswietl_macierze_symulacji = true;
+                } else {
+                    konfiguracja.wyswietl_macierze_symulacji = false;
+                }
+            }
         }
     }
     

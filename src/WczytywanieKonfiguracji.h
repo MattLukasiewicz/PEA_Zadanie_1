@@ -13,6 +13,12 @@ struct Konfiguracja {
     bool tryb_z_pliku = false;
     bool tryb_symulacji = false;
     bool czy_symetryczny = false;
+    bool generuj_pliki_raz = false;
+    int generuj_min_n = 6;
+    int generuj_max_n = 15;
+    std::string katalog_sym = "sym";
+    std::string katalog_asym = "asym";
+    bool wyswietl_macierze_symulacji = false;
 };
 
 Konfiguracja wczytajKonfiguracje(std::string nazwa_pliku);

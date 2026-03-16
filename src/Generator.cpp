@@ -1,5 +1,7 @@
 #include "Generator.h"
 
+#include <filesystem>
+#include <fstream>
 #include <random>
 
 using namespace std;
@@ -65,4 +67,55 @@ Graf generujGrafAsymetryczny(int rozmiar) {
     }
 
     return graf;
+}
+
+
+
+void zapiszGrafDoTsplib(const Graf& graf, const string& nazwa, const string& typ, const string& sciezka) {
+    ofstream plik(sciezka);
+    if (!plik.is_open()) {
+        return;
+    }
+
+    plik << "NAME: " << nazwa << "\n";
+    plik << "TYPE: " << typ << "\n";
+    plik << "DIMENSION: " << graf.rozmiar << "\n";
+    plik << "EDGE_WEIGHT_TYPE: EXPLICIT\n";
+    plik << "EDGE_WEIGHT_FORMAT: FULL_MATRIX\n";
+    plik << "EDGE_WEIGHT_SECTION\n";
+
+    for (int i = 0; i < graf.rozmiar; i++) {
+        for (int j = 0; j < graf.rozmiar; j++) {
+            plik << graf.macierz[i][j];
+            if (j + 1 < graf.rozmiar) {
+                plik << " ";
+            }
+        }
+        plik << "\n";
+    }
+
+    plik << "EOF\n";
+}
+
+
+
+void generujBazePlikow(int min_n, int max_n, const string& katalogSym, const string& katalogAsym) {
+    if (min_n > max_n || min_n <= 0) {
+        return;
+    }
+
+    if (katalogSym.empty() || katalogAsym.empty()) {
+        return;
+    }
+
+    std::filesystem::create_directories(katalogSym);
+    std::filesystem::create_directories(katalogAsym);
+
+    for (int n = min_n; n <= max_n; n++) {
+        Graf sym = generujGrafSymetryczny(n);
+        Graf asym = generujGrafAsymetryczny(n);
+
+        zapiszGrafDoTsplib(sym, "sym_" + to_string(n), "TSP", katalogSym + "/sym_" + to_string(n) + ".tsp");
+        zapiszGrafDoTsplib(asym, "asym_" + to_string(n), "ATSP", katalogAsym + "/asym_" + to_string(n) + ".atsp");
+    }
 }

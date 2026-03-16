@@ -12,6 +12,16 @@
 
 using namespace std;
 
+string polaczSciezke(const string& katalog, const string& plik) {
+    if (katalog.empty()) {
+        return plik;
+    }
+    if (katalog.back() == '/' || katalog.back() == '\\') {
+        return katalog + plik;
+    }
+    return katalog + "/" + plik;
+}
+
 void rysujPasekPostepu(int aktualny, int wszystkich, bool czyPokazywac) {
     if (!czyPokazywac || wszystkich == 0) return;
 
@@ -31,7 +41,7 @@ void rysujPasekPostepu(int aktualny, int wszystkich, bool czyPokazywac) {
 }
 
 void uruchomTestPoprawnosciZPliku(const Konfiguracja& konf) {
-    cout << "\n>Sprawdzanie poprawności algorytmow" << endl;
+    cout << "\n>Sprawdzanie poprawnosci algorytmow" << endl;
 
     Graf grafZPliku = wczytajGraf(konf.plik_wejsciowy);
     if (grafZPliku.rozmiar <= 0) {
@@ -45,8 +55,8 @@ void uruchomTestPoprawnosciZPliku(const Konfiguracja& konf) {
 
     if (konf.algorytm == "NN") {
         kosztTrasy = NajblizszySasiad(grafZPliku);
-    } else {
-        PrzegladZupelny(grafZPliku);
+    } else if(konf.algorytm == "BF") {
+        kosztTrasy = PrzegladZupelny(grafZPliku);
     }
     stoper.stopStopera();
 
@@ -59,6 +69,7 @@ void uruchomSymulacjePrzegladu(const Konfiguracja& konf) {
     bool czySymetryczny = konf.czy_symetryczny;
     string typProblemu = czySymetryczny ? "Symetryczny" : "Asymetryczny";
     ofstream plik(konf.plik_wyjsciowy, ios::app);
+    vector<string> ostrzezenia;
 
     if (konf.liczba_powtorzen <= 0 || konf.rozmiar_koncowy < konf.rozmiar_poczatkowy) {
         cout << "BLAD: Niepoprawne parametry symulacji w config.ini" << endl;
@@ -71,22 +82,48 @@ void uruchomSymulacjePrzegladu(const Konfiguracja& konf) {
     cout << "\nSymulacja algorytmu przegladu zupelnego " << typProblemu << " <<<" << endl;
     cout << "Zakres N: " << konf.rozmiar_poczatkowy << "-" << konf.rozmiar_koncowy
          << ", powtorzenia: " << konf.liczba_powtorzen << endl;
-        cout << "Rozmiar N | Sredni Czas [ms]" << endl;
+    cout << "Rozmiar N | Sredni Czas [ms]" << endl;
+    cout << endl;
     rysujPasekPostepu(0, wszystkieKroki, konf.pokazuj_pasek_postepu);
 
     for (int n = konf.rozmiar_poczatkowy; n <= konf.rozmiar_koncowy; n++) {
+        string nazwaPliku = czySymetryczny
+            ? "sym_" + to_string(n) + ".tsp"
+            : "asym_" + to_string(n) + ".atsp";
+        string sciezka = czySymetryczny
+            ? polaczSciezke(konf.katalog_sym, nazwaPliku)
+            : polaczSciezke(konf.katalog_asym, nazwaPliku);
+
+        Graf graf = wczytajGraf(sciezka, false);
+        if (graf.rozmiar == 0) {
+            string ostrzezenie = "OSTRZEZENIE: Brak lub niepoprawny plik: " + sciezka + ". Pomijam N=" + to_string(n);
+            ostrzezenia.push_back(ostrzezenie);
+            aktualnyKrok += konf.liczba_powtorzen;
+            rysujPasekPostepu(aktualnyKrok, wszystkieKroki, konf.pokazuj_pasek_postepu);
+
+            if (konf.pokazuj_pasek_postepu) {
+                cout << "\r" << string(70, ' ') << "\r";
+                cout << ostrzezenie << endl;
+                rysujPasekPostepu(aktualnyKrok, wszystkieKroki, true);
+            }
+            continue;
+        }
+
+        if (konf.wyswietl_macierze_symulacji) {
+            cout << "\nMacierz dla N=" << n << " z pliku: " << sciezka << endl;
+            for (int i = 0; i < graf.rozmiar; i++) {
+                for (int j = 0; j < graf.rozmiar; j++) {
+                    cout << setw(4) << graf.macierz[i][j] << " ";
+                }
+                cout << endl;
+            }
+        }
+
         double sumaCzasowMs = 0.0;
 
         for (int i = 1; i <= konf.liczba_powtorzen; i++) {
-            Graf g;
-            if (czySymetryczny) {
-                g = generujGrafSymetryczny(n);
-            } else {
-                g = generujGrafAsymetryczny(n);
-            }
-
             stoper.startStopera();
-            PrzegladZupelny(g);
+            PrzegladZupelny(graf);
             stoper.stopStopera();
 
             sumaCzasowMs += stoper.pobierzCzasMs();
@@ -98,7 +135,7 @@ void uruchomSymulacjePrzegladu(const Konfiguracja& konf) {
         double sredniCzas = sumaCzasowMs / static_cast<double>(konf.liczba_powtorzen);
 
         if (konf.pokazuj_pasek_postepu) {
-            cout << "\r" << string(60, ' ') << "\r";
+            cout << "\r" << string(70, ' ') << "\r";
         }
 
         cout << setw(9) << n << " | "
@@ -113,7 +150,13 @@ void uruchomSymulacjePrzegladu(const Konfiguracja& konf) {
     }
 
     if (konf.pokazuj_pasek_postepu) {
+        cout << "\r" << string(70, ' ') << "\r";
+        rysujPasekPostepu(wszystkieKroki, wszystkieKroki, true);
         cout << endl;
+    }
+
+    for (const auto& ostrzezenie : ostrzezenia) {
+        cout << ostrzezenie << endl;
     }
 
     plik.close();
@@ -121,6 +164,12 @@ void uruchomSymulacjePrzegladu(const Konfiguracja& konf) {
 
 int main() {
     Konfiguracja konf = wczytajKonfiguracje("config.ini");
+
+    if (konf.generuj_pliki_raz) {
+        generujBazePlikow(konf.generuj_min_n, konf.generuj_max_n, konf.katalog_sym, konf.katalog_asym);
+        cout << "Pliki wygenerowane." << endl;
+        return 0;
+    }
 
     cout << "Zaladowano konfiguracje. Liczba powtorzen: " << konf.liczba_powtorzen << endl;
 
