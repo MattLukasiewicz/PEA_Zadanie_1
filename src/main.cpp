@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <iomanip>
 
 #include "WczytywanieKonfiguracji.h"
 #include "WczytywanieGrafu.h"
@@ -11,24 +12,26 @@
 
 using namespace std;
 
-// 1. Obliczanie teoretycznej zajetosci pamieci przez algorytm i graf
-long long obliczZajetaPamiec(int n) {
-    long long pamiecMacierzy = n * n * sizeof(int); 
-    long long narzutWektorow = n * sizeof(std::vector<int>) + sizeof(std::vector<std::vector<int>>);
-    long long pamiecTrasy = n * sizeof(int) + sizeof(std::vector<int>);
-    return pamiecMacierzy + narzutWektorow + pamiecTrasy;
-}
-
-// 2. Wskaznik postepu
 void rysujPasekPostepu(int aktualny, int wszystkich, bool czyPokazywac) {
     if (!czyPokazywac || wszystkich == 0) return;
 
+    constexpr int szerokoscPaska = 30;
+    if (aktualny > wszystkich) {
+        aktualny = wszystkich;
+    }
+
     int procent = (aktualny * 100) / wszystkich;
-    cout << "\rPostep: " << aktualny << "/" << wszystkich << " (" << procent << "%)" << flush;
+    int zapelnienie = (aktualny * szerokoscPaska) / wszystkich;
+
+    cout << "\rPostep: [";
+    for (int i = 0; i < szerokoscPaska; i++) {
+        cout << (i < zapelnienie ? '#' : '-');
+    }
+    cout << "] " << setw(3) << procent << "%" << flush;
 }
 
 void uruchomTestPoprawnosciZPliku(const Konfiguracja& konf) {
-    cout << "\n>>> TEST POPRAWNOSCI (DANE Z PLIKU) <<<" << endl;
+    cout << "\n>Sprawdzanie poprawności algorytmow" << endl;
 
     Graf grafZPliku = wczytajGraf(konf.plik_wejsciowy);
     if (grafZPliku.rozmiar <= 0) {
@@ -38,70 +41,85 @@ void uruchomTestPoprawnosciZPliku(const Konfiguracja& konf) {
 
     Stoper stoper;
     stoper.startStopera();
-    PrzegladZupelny(grafZPliku);
+    int kosztTrasy = -1;
+
+    if (konf.algorytm == "NN") {
+        kosztTrasy = NajblizszySasiad(grafZPliku);
+    } else {
+        PrzegladZupelny(grafZPliku);
+    }
     stoper.stopStopera();
 
+    cout << "Koszt trasy: " << kosztTrasy << endl;
     cout << "Czas testu [ms]: " << stoper.pobierzCzasMs() << endl;
 }
 
-// 3. Glowna funkcja symulacji
-void uruchomSymulacje(bool czySymetryczny, const Konfiguracja& konf) {
+void uruchomSymulacjePrzegladu(const Konfiguracja& konf) {
     Stoper stoper;
+    bool czySymetryczny = konf.czy_symetryczny;
     string typProblemu = czySymetryczny ? "Symetryczny" : "Asymetryczny";
-    ofstream plik(konf.plik_wyjsciowy, ios::app); // Dopisywanie do CSV
+    ofstream plik(konf.plik_wyjsciowy, ios::app);
 
-    cout << "\n>>> SYMULACJA: " << typProblemu << " <<<" << endl;
-    cout << "N\tSredni Czas [ms]\tPamiec [B]" << endl;
+    if (konf.liczba_powtorzen <= 0 || konf.rozmiar_koncowy < konf.rozmiar_poczatkowy) {
+        cout << "BLAD: Niepoprawne parametry symulacji w config.ini" << endl;
+        return;
+    }
 
-    // Pobieramy parametry z pliku konfiguracyjnego
+    int wszystkieKroki = (konf.rozmiar_koncowy - konf.rozmiar_poczatkowy + 1) * konf.liczba_powtorzen;
+    int aktualnyKrok = 0;
+
+    cout << "\nSymulacja algorytmu przegladu zupelnego " << typProblemu << " <<<" << endl;
+    cout << "Zakres N: " << konf.rozmiar_poczatkowy << "-" << konf.rozmiar_koncowy
+         << ", powtorzenia: " << konf.liczba_powtorzen << endl;
+        cout << "Rozmiar N | Sredni Czas [ms]" << endl;
+    rysujPasekPostepu(0, wszystkieKroki, konf.pokazuj_pasek_postepu);
+
     for (int n = konf.rozmiar_poczatkowy; n <= konf.rozmiar_koncowy; n++) {
-        
         double sumaCzasowMs = 0.0;
 
-        // Pętla badająca X losowych instancji dla danego rozmiaru N
         for (int i = 1; i <= konf.liczba_powtorzen; i++) {
-            
-            // Wskaznik postepu na ekranie
-            rysujPasekPostepu(i, konf.liczba_powtorzen, konf.pokazuj_pasek_postepu);
+            Graf g;
+            if (czySymetryczny) {
+                g = generujGrafSymetryczny(n);
+            } else {
+                g = generujGrafAsymetryczny(n);
+            }
 
-            Graf g = generujGraf(n, czySymetryczny);
-            
             stoper.startStopera();
-            PrzegladZupelny(g); // Zakładamy, że ta funkcja zwraca wynik bez niepotrzebnych coutów
+            PrzegladZupelny(g);
             stoper.stopStopera();
 
-            sumaCzasowMs += stoper.pobierzCzasMs(); // Czas w milisekundach
+            sumaCzasowMs += stoper.pobierzCzasMs();
+
+            aktualnyKrok++;
+            rysujPasekPostepu(aktualnyKrok, wszystkieKroki, konf.pokazuj_pasek_postepu);
         }
-        
-        // Czyszczenie linii z postepem (wersja kompatybilna z Windows terminal)
+
+        double sredniCzas = sumaCzasowMs / static_cast<double>(konf.liczba_powtorzen);
+
         if (konf.pokazuj_pasek_postepu) {
-            cout << "\r                                        \r";
+            cout << "\r" << string(60, ' ') << "\r";
         }
 
-        // Wyliczenie sredniej
-        double sredniCzas = sumaCzasowMs / konf.liczba_powtorzen;
-        long long pamiecBajty = obliczZajetaPamiec(n);
+        cout << setw(9) << n << " | "
+             << setw(16) << fixed << setprecision(3) << sredniCzas << endl;
 
-        // Ekran (zgodnie z wytycznymi: Rozmiar, Srednia, Pamiec, Jednostki)
-        cout << n << "\t" << sredniCzas << " ms\t\t" << pamiecBajty << " B" << endl;
+        rysujPasekPostepu(aktualnyKrok, wszystkieKroki, konf.pokazuj_pasek_postepu);
 
-        // Plik CSV (Średniki używane do podziału kolumn w Excelu)
         if (plik.is_open()) {
-            plik << typProblemu << ";" << n << ";" << sredniCzas << ";" << pamiecBajty << "\n";
+            plik << typProblemu << ";" << n << ";" << sredniCzas << "\n";
             plik.flush();
         }
-
-        // Warunek awaryjny - "rozsądny czas" 30 min (1 800 000 ms)
-        if (sredniCzas > 1800000.0) { 
-            cout << "Przekroczono limit 30 min dla rozmiaru " << n << ". Przerywam badanie tej grupy." << endl;
-            break;
-        }
     }
+
+    if (konf.pokazuj_pasek_postepu) {
+        cout << endl;
+    }
+
     plik.close();
 }
 
 int main() {
-    // 1. Wczytujemy plik
     Konfiguracja konf = wczytajKonfiguracje("config.ini");
 
     cout << "Zaladowano konfiguracje. Liczba powtorzen: " << konf.liczba_powtorzen << endl;
@@ -114,17 +132,14 @@ int main() {
     if (konf.tryb_z_pliku) {
         uruchomTestPoprawnosciZPliku(konf);
     }
-
     if (konf.tryb_symulacji) {
-        ofstream czysc(konf.plik_wyjsciowy);
-        czysc << "Typ;Rozmiar_N;Sredni_Czas_ms;Zajeta_Pamiec_B\n";
-        czysc.close();
-
-        uruchomSymulacje(false, konf);
-        uruchomSymulacje(true, konf);
+        if(konf.algorytm == "BF"){
+            ofstream czysc(konf.plik_wyjsciowy);
+            czysc << "Typ;N;Sredni_Czas_ms\n";
+            czysc.close();
+            uruchomSymulacjePrzegladu(konf);
+        }
+        
     }
-
-    cout << "\nBadania zakonczone. Wyniki w pliku: " << konf.plik_wyjsciowy << endl;
-    
     return 0;
 }

@@ -2,9 +2,28 @@
 #include <fstream>
 #include <string>
 #include <cstdlib>
+#include <cctype>
 #include "WczytywanieKonfiguracji.h"
 
 using namespace std;
+
+namespace {
+
+string trim(const string& tekst) {
+    size_t start = 0;
+    while (start < tekst.size() && std::isspace(static_cast<unsigned char>(tekst[start]))) {
+        start++;
+    }
+
+    size_t koniec = tekst.size();
+    while (koniec > start && std::isspace(static_cast<unsigned char>(tekst[koniec - 1]))) {
+        koniec--;
+    }
+
+    return tekst.substr(start, koniec - start);
+}
+
+}
 
 Konfiguracja wczytajKonfiguracje(string nazwa_pliku) {
     Konfiguracja konfiguracja; 
@@ -21,15 +40,16 @@ Konfiguracja wczytajKonfiguracje(string nazwa_pliku) {
 
     string linia;
     while (getline(plik, linia)) {
-        if (linia == "" || linia[0] == '#') {
+        linia = trim(linia);
+        if (linia.empty() || linia[0] == '#') {
             continue;
         }
 
         int pozycja_rownasi = linia.find('='); 
         
         if (pozycja_rownasi > 0) { 
-            string klucz = linia.substr(0, pozycja_rownasi);
-            string wartosc = linia.substr(pozycja_rownasi + 1);
+            string klucz = trim(linia.substr(0, pozycja_rownasi));
+            string wartosc = trim(linia.substr(pozycja_rownasi + 1));
 
             if (klucz == "algorytm") {
                 konfiguracja.algorytm = wartosc;
@@ -68,6 +88,13 @@ Konfiguracja wczytajKonfiguracje(string nazwa_pliku) {
                     konfiguracja.tryb_symulacji = true;
                 } else {
                     konfiguracja.tryb_symulacji = false;
+                }
+            }
+            else if (klucz == "czy_symetryczny") {
+                if (wartosc == "1") {
+                    konfiguracja.czy_symetryczny = true;
+                } else {
+                    konfiguracja.czy_symetryczny = false;
                 }
             }
         }

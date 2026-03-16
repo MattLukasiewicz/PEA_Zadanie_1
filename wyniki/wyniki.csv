@@ -1,8 +1,9 @@
-Typ;Rozmiar_N;Sredni_Czas_ms;Zajeta_Pamiec_B
-Asymetryczny;6;0.11136;360
-Asymetryczny;7;0.24628;440
-Asymetryczny;8;1.27658;528
-Asymetryczny;9;9.54992;624
-Asymetryczny;10;77.0028;728
-Asymetryczny;11;800.954;840
-Asymetryczny;12;9441.75;960
+Typ;N;Sredni_Czas_ms
+Asymetryczny;6;0.0174
+Asymetryczny;7;0.10215
+Asymetryczny;8;0.79205
+Asymetryczny;9;6.7409
+Asymetryczny;10;87.2816
+Asymetryczny;11;787.194
+Asymetryczny;12;15198.4
+Asymetryczny;13;119956

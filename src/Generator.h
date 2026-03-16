@@ -2,4 +2,5 @@
 
 #include "WczytywanieGrafu.h"
 
-Graf generujGraf(int rozmiar, bool czySymetryczny);
+Graf generujGrafSymetryczny(int rozmiar);
+Graf generujGrafAsymetryczny(int rozmiar);

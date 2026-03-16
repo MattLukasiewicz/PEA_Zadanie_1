@@ -3,15 +3,16 @@
 #include <string>
 
 struct Konfiguracja {
-    std::string algorytm;
-    std::string plik_wejsciowy;
-    std::string plik_wyjsciowy;
-    int liczba_powtorzen;
-    int rozmiar_poczatkowy;
-    int rozmiar_koncowy;
-    bool pokazuj_pasek_postepu;
-    bool tryb_z_pliku;
-    bool tryb_symulacji;
+    std::string algorytm = "NN";
+    std::string plik_wejsciowy = "dane/matrix_11x11.atsp";
+    std::string plik_wyjsciowy = "wyniki/wyniki.csv";
+    int liczba_powtorzen = 1;
+    int rozmiar_poczatkowy = 6;
+    int rozmiar_koncowy = 15;
+    bool pokazuj_pasek_postepu = false;
+    bool tryb_z_pliku = false;
+    bool tryb_symulacji = false;
+    bool czy_symetryczny = false;
 };
 
 Konfiguracja wczytajKonfiguracje(std::string nazwa_pliku);
