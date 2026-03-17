@@ -7,50 +7,34 @@
 
 using namespace std;
 
-Graf wczytajGraf(string nazwa_pliku, bool pokazKomunikaty) {
+Graf wczytajGraf(string nazwa_pliku, int& optimum) {
     Graf graf;
     graf.rozmiar = 0;
+    optimum = 0; 
     ifstream plik(nazwa_pliku);
 
-    if (!plik.is_open()) {
-        if (pokazKomunikaty) {
-            cout << "BLAD: Nie mozna otworzyc pliku: " << nazwa_pliku << endl;
-        }
-        return graf;
-    }
+    if (!plik.is_open()) return graf; // Zabezpieczenie przed brakiem pliku
 
-    if (!(plik >> graf.rozmiar)) {
-        if (pokazKomunikaty) {
-            cout << "BLAD: Nie udalo sie odczytac rozmiaru grafu!" << endl;
-        }
-        return graf;
-    }
-
-    
+    plik >> graf.rozmiar; // 1. Pobieramy pierwszą liczbę z pliku (rozmiar N)
 
     graf.macierz.assign(graf.rozmiar, vector<int>(graf.rozmiar, 0));
 
     for (int i = 0; i < graf.rozmiar; i++) {
         for (int j = 0; j < graf.rozmiar; j++) {
-            if (!(plik >> graf.macierz[i][j])) {
-                if (pokazKomunikaty) {
-                    cout << "BLAD: Niepelna macierz w pliku: " << nazwa_pliku << endl;
-                }
-                graf.rozmiar = 0;
-                graf.macierz.clear();
-                return graf;
-            }
+            
+            plik >> graf.macierz[i][j]; // 2. Pobieramy wagę drogi z pliku!
 
             if (i == j) {
-                graf.macierz[i][j] = -1;
+                graf.macierz[i][j] = -1; // Ustawiamy przekątną
             }
         }
     }
 
+    string ignoruj;
+    getline(plik, ignoruj, '='); 
+    plik >> optimum;             
+
     plik.close();
-    if (pokazKomunikaty) {
-        cout << "Wczytano macierz o rozmiarze " << graf.rozmiar << "x" << graf.rozmiar << endl;
-    }
     return graf;
 }
 
