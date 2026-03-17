@@ -23,6 +23,14 @@ string trim(const string& tekst) {
     return tekst.substr(start, koniec - start);
 }
 
+string usunKomentarzInline(const string& tekst) {
+    size_t pozycjaHash = tekst.find('#');
+    if (pozycjaHash == string::npos) {
+        return tekst;
+    }
+    return tekst.substr(0, pozycjaHash);
+}
+
 }
 
 Konfiguracja wczytajKonfiguracje(string nazwa_pliku) {
@@ -49,7 +57,7 @@ Konfiguracja wczytajKonfiguracje(string nazwa_pliku) {
         
         if (pozycja_rownasi > 0) { 
             string klucz = trim(linia.substr(0, pozycja_rownasi));
-            string wartosc = trim(linia.substr(pozycja_rownasi + 1));
+            string wartosc = trim(usunKomentarzInline(linia.substr(pozycja_rownasi + 1)));
 
             if (klucz == "algorytm") {
                 konfiguracja.algorytm = wartosc;

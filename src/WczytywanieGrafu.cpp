@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <cctype>
+#include <iomanip>
 #include "WczytywanieGrafu.h"
 
 using namespace std;
@@ -19,43 +19,16 @@ Graf wczytajGraf(string nazwa_pliku, bool pokazKomunikaty) {
         return graf;
     }
 
-    string slowo;
-    if (!(plik >> slowo)) {
-        if (pokazKomunikaty) {
-            cout << "BLAD: Plik jest pusty!" << endl;
-        }
-        return graf;
-    }
-
-    if (isdigit(static_cast<unsigned char>(slowo[0]))) {
-        graf.rozmiar = stoi(slowo);
-        graf.macierz.assign(graf.rozmiar, vector<int>(graf.rozmiar, 0));
-    } else {
-        do {
-            if (slowo == "DIMENSION:" || slowo == "DIMENSION") {
-                string wartosc;
-                plik >> wartosc;
-                if (wartosc == ":") {
-                    plik >> wartosc;
-                }
-                graf.rozmiar = stoi(wartosc);
-                graf.macierz.assign(graf.rozmiar, vector<int>(graf.rozmiar, 0));
-            } else if (slowo == "EDGE_WEIGHT_SECTION") {
-                break;
-            }
-        } while (plik >> slowo);
-    }
-
-    if (graf.rozmiar <= 0) {
+    if (!(plik >> graf.rozmiar)) {
         if (pokazKomunikaty) {
             cout << "BLAD: Nie udalo sie odczytac rozmiaru grafu!" << endl;
         }
         return graf;
     }
 
-    if (graf.macierz.empty()) {
-        graf.macierz.assign(graf.rozmiar, vector<int>(graf.rozmiar, 0));
-    }
+    
+
+    graf.macierz.assign(graf.rozmiar, vector<int>(graf.rozmiar, 0));
 
     for (int i = 0; i < graf.rozmiar; i++) {
         for (int j = 0; j < graf.rozmiar; j++) {
@@ -79,4 +52,19 @@ Graf wczytajGraf(string nazwa_pliku, bool pokazKomunikaty) {
         cout << "Wczytano macierz o rozmiarze " << graf.rozmiar << "x" << graf.rozmiar << endl;
     }
     return graf;
+}
+
+void wyswietlGraf(const Graf& graf) {
+    if (graf.rozmiar <= 0) {
+        cout << "Graf jest pusty." << endl;
+        return;
+    }
+
+    cout << "\n--- MACIERZ " << graf.rozmiar << "x" << graf.rozmiar << " ---" << endl;
+    for (int i = 0; i < graf.rozmiar; i++) {
+        for (int j = 0; j < graf.rozmiar; j++) {
+            cout << setw(4) << graf.macierz[i][j] << " ";
+        }
+        cout << endl;
+    }
 }

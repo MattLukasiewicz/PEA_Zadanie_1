@@ -9,3 +9,4 @@ struct Graf {
 };
 
 Graf wczytajGraf(std::string nazwa_pliku, bool pokazKomunikaty = true);
+void wyswietlGraf(const Graf& graf);

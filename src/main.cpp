@@ -49,6 +49,8 @@ void uruchomTestPoprawnosciZPliku(const Konfiguracja& konf) {
         return;
     }
 
+    wyswietlGraf(grafZPliku);
+
     Stoper stoper;
     stoper.startStopera();
     int kosztTrasy = -1;
